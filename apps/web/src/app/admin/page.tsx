@@ -8,6 +8,6 @@ export default async function AdminDashboard() {
     <section className="grid stats">
       {Object.entries(stats).map(([status, count]) => <div className="panel stat" key={status}><span className={`badge ${status}`}>{status}</span><strong>{count}</strong></div>)}
     </section>
-    <section className="panel"><h2>다음 작업</h2><p>후보의 공공데이터·Kakao·Naver 매칭과 근거를 비교한 뒤 수정하여 승인하세요.</p><Link className="button" href="/admin/candidates">후보 검수 시작</Link></section>
+    <section className="panel"><h2>다음 작업</h2><p>후보를 승인한 뒤 장소 관리에서 공개 상태로 전환하세요.</p><div className="filters"><Link className="button" href="/admin/candidates">후보 검수</Link><Link className="button secondary" href="/admin/places">장소 공개 관리</Link></div></section>
   </div>;
 }

@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { placeStatusUpdate, type PlaceStatus } from "@/lib/admin-place";
 
 export interface CandidateRow {
   id: string;
@@ -11,6 +12,21 @@ export interface CandidateRow {
   status: "pending" | "approved" | "rejected" | "needs_revision";
   review_note: string | null;
   created_at: string;
+}
+
+export type { PlaceStatus } from "@/lib/admin-place";
+
+export interface AdminPlaceRow {
+  id: string;
+  slug: string;
+  name_ko: string;
+  name_en: string | null;
+  primary_category: string;
+  area: string;
+  address_ko: string | null;
+  status: PlaceStatus;
+  published_at: string | null;
+  updated_at: string;
 }
 
 const headers = { apikey: env.SUPABASE_SECRET_KEY, "Content-Type": "application/json" };
@@ -60,4 +76,27 @@ export async function getDashboardStats() {
     return [status, result.count ?? 0] as const;
   }));
   return Object.fromEntries(statuses) as Record<string, number>;
+}
+
+export async function listAdminPlaces(filters: { status?: string; area?: string; category?: string; query?: string; page?: number }) {
+  const page = filters.page ?? 1;
+  const limit = 30;
+  const params = new URLSearchParams({ select: "id,slug,name_ko,name_en,primary_category,area,address_ko,status,published_at,updated_at", order: "updated_at.desc", limit: String(limit), offset: String((page - 1) * limit) });
+  if (filters.status) params.set("status", `eq.${filters.status}`);
+  if (filters.area) params.set("area", `eq.${filters.area}`);
+  if (filters.category) params.set("primary_category", `eq.${filters.category}`);
+  if (filters.query) params.set("or", `(name_ko.ilike.*${filters.query.replaceAll("*", "")}*,name_en.ilike.*${filters.query.replaceAll("*", "")}*)`);
+  return request<AdminPlaceRow[]>(`places?${params}`, { headers: { Prefer: "count=exact" } });
+}
+
+export async function updatePlaceStatus(id: string, status: PlaceStatus, actorId: string): Promise<void> {
+  const before = await request<AdminPlaceRow[]>(`places?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
+  if (!before.data[0]) throw new Error("Place not found");
+  const update = placeStatusUpdate(status);
+  await request(`places?id=eq.${encodeURIComponent(id)}`, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify(update) });
+  await request("admin_audit_logs", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ actor_id: actorId, action: "change_status", entity_type: "place", entity_id: id, before_data: before.data[0], after_data: update }),
+  });
 }
