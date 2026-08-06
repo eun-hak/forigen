@@ -1,0 +1,38 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f6f2;
+  --panel: #ffffff;
+  --ink: #172019;
+  --muted: #667168;
+  --line: #dce2dc;
+  --accent: #176b45;
+  --warning: #9a5c00;
+  --danger: #a12d2d;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: Arial, sans-serif; }
+a { color: inherit; }
+button, input, select, textarea { font: inherit; }
+.shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.grid { display: grid; gap: 16px; }
+.stats { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.stat strong { display: block; font-size: 28px; margin-top: 8px; }
+.muted { color: var(--muted); }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.input { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; background: white; }
+.button { border: 0; border-radius: 9px; padding: 10px 14px; cursor: pointer; background: var(--accent); color: white; text-decoration: none; display: inline-block; }
+.button.secondary { background: #e8eee9; color: var(--ink); }
+.button.danger { background: var(--danger); }
+table { width: 100%; border-collapse: collapse; }
+th, td { border-bottom: 1px solid var(--line); padding: 12px 10px; text-align: left; vertical-align: top; }
+th { color: var(--muted); font-size: 13px; }
+.badge { display: inline-block; border-radius: 999px; padding: 4px 8px; background: #e8eee9; font-size: 12px; }
+.badge.pending { color: var(--warning); background: #fff4d9; }
+.badge.approved { color: var(--accent); background: #ddf3e7; }
+.detail-grid { grid-template-columns: minmax(0, 1fr) minmax(320px, .8fr); }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f6f7f5; padding: 12px; border-radius: 9px; }
+label { display: grid; gap: 6px; font-weight: 600; }
+textarea { min-height: 110px; }
+@media (max-width: 800px) { .shell { padding: 14px; } .detail-grid { grid-template-columns: 1fr; } table { display: block; overflow-x: auto; } }

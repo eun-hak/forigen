@@ -1,0 +1,12 @@
+{
+  "name": "kbeauty-now",
+  "private": true,
+  "packageManager": "pnpm@11.20.0",
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "dev:web": "pnpm --filter @kbeauty-now/web dev",
+    "crawl": "pnpm --filter @kbeauty-now/crawler crawl"
+  }
+}

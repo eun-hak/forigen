@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.next/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+crawler/input/*.csv
+crawler/output/*
+!crawler/output/.gitkeep
+crawler/screenshots/*
+!crawler/screenshots/.gitkeep
+*.log
+.DS_Store

@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - crawler
+  - packages/*
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - tsx@4.23.8
+  - '@supabase/auth-js@2.112.1'
+  - '@supabase/functions-js@2.112.1'
+  - '@supabase/postgrest-js@2.112.1'
+  - '@supabase/realtime-js@2.112.1'
+  - '@supabase/storage-js@2.112.1'
+  - '@supabase/supabase-js@2.112.1'
