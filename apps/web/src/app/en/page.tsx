@@ -13,8 +13,8 @@ export default function EnglishHomePage() {
     <section className="hero">
       <div className="eyebrow">SEOUL BEAUTY, MADE BOOKABLE</div>
       <h1>Find a K-beauty spot<br />you can <em>actually book.</em></h1>
-      <p>Clear answers on English support, Korean phone requirements, foreign cards and same-day booking—checked source by source.</p>
-      <div className="trust-row"><span>✓ Evidence-backed</span><span>✓ Foreigner-first</span><span>✓ Recently checked</span></div>
+      <p>Clear answers on English support, Korean phone requirements, foreign cards and same-day booking.</p>
+      <div className="trust-row"><span>✓ Easy to compare</span><span>✓ Foreigner-first</span><span>✓ Honest about unknowns</span></div>
     </section>
     <section className="search-section"><div className="section-heading"><div><span className="eyebrow">START HERE</span><h2>Build your beauty plan</h2></div><p>Four quick choices. No account needed.</p></div><SearchWizard /></section>
     <section className="promise-grid">
