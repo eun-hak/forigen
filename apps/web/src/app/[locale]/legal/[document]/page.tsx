@@ -1,0 +1,10 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { PublicHeader } from "@/components/public-header";
+
+const allowed = new Set(["privacy", "terms", "data-sources"]);
+export default async function LegalPage({ params }: { params: Promise<{ locale: string; document: string }> }) {
+  const { locale, document } = await params; if (!allowed.has(document) || !["en", "ko"].includes(locale)) notFound(); const ko = locale === "ko";
+  const content = document === "privacy" ? { title: ko ? "개인정보처리방침" : "Privacy Policy", body: ko ? "변경 제보 시 이메일은 선택 사항이며, 제보 확인과 회신 목적으로만 사용합니다. 서비스는 관리자 인증과 운영에 Supabase를 사용합니다. 수집 목적이 끝난 정보는 운영 정책에 따라 삭제합니다." : "Email is optional when reporting an update and is used only to review or reply to that report. The service uses Supabase for administrator authentication and operations. Data is removed according to our retention policy when no longer needed." } : document === "terms" ? { title: ko ? "이용약관" : "Terms of Use", body: ko ? "K-Beauty Now는 장소 탐색을 돕는 정보 서비스입니다. 가격, 영업 여부, 예약 가능 여부를 보장하지 않으며 방문 또는 결제 전 업체에 직접 확인해야 합니다. 외부 사이트 이용은 해당 서비스의 정책을 따릅니다." : "K-Beauty Now is an informational discovery service. We do not guarantee prices, operating status or booking availability. Confirm directly with the business before visiting or paying. External services are governed by their own terms." } : { title: ko ? "데이터 출처 및 검증 원칙" : "Data Sources & Verification", body: ko ? "공공데이터, 지도 검색 결과, 업체 공식 웹사이트를 바탕으로 장소 후보를 구성합니다. 조건별 근거와 확인일을 분리해 기록하며, 확인되지 않은 내용은 가능한 것으로 표시하지 않습니다. 오류는 각 장소 상세의 변경 제보 기능으로 알려주세요." : "Place candidates are built from public data, map search results and official business websites. Evidence and check dates are recorded per condition, and unconfirmed claims are not presented as available. Report errors from each place detail page." };
+  return <div className="public-shell"><PublicHeader locale={locale as "en" | "ko"} /><main className="legal-page"><span className="eyebrow">K-BEAUTY NOW</span><h1>{content.title}</h1><p>{content.body}</p><p><Link href={`/${locale}`}>{ko ? "홈으로 돌아가기" : "Back to home"} →</Link></p></main></div>;
+}

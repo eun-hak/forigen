@@ -57,6 +57,18 @@ function absoluteLinks($: cheerio.CheerioAPI, base: URL): string[] {
   return [...links].slice(0, 200);
 }
 
+export function isBookingLink(link: string, sourceUrl: string): boolean {
+  try {
+    const url = new URL(link);
+    const source = new URL(sourceUrl);
+    const bookingPath = /(?:^|\/)(?:book(?:ing)?|reserv(?:e|ation)?|appointment)(?:\/|$)/i.test(url.pathname);
+    if (url.origin === source.origin) return bookingPath;
+    return ["booking.naver.com", "m.booking.naver.com", "creatrip.com", "www.creatrip.com", "klook.com", "www.klook.com", "trazy.com", "www.trazy.com"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function extractFromHtml(html: string, sourceUrl: string, checkedAt = new Date()): PageExtraction {
   const $ = cheerio.load(html);
   $("script, style, noscript, svg, nav, footer").remove();
@@ -64,7 +76,7 @@ export function extractFromHtml(html: string, sourceUrl: string, checkedAt = new
   const description = $('meta[name="description"]').attr("content")?.trim() || undefined;
   const text = $("body").text().replace(/\s+/g, " ").trim();
   const links = absoluteLinks($, new URL(sourceUrl));
-  const bookingUrl = links.find((link) => /book|reserv|appointment|booking|creatrip|klook|trazy/i.test(link));
+  const bookingUrl = links.find((link) => isBookingLink(link, sourceUrl));
   const evidence: Evidence[] = [];
   for (const rule of RULES) {
     const match = rule.pattern.exec(text);

@@ -14,6 +14,15 @@ export const placeListQuerySchema = z.object({
 
 export type PlaceListQuery = z.infer<typeof placeListQuerySchema>;
 
+export function hasVerificationFilters(query: PlaceListQuery) {
+  return Boolean(query.english_support || query.same_day_booking || query.no_korean_phone || query.foreign_card);
+}
+
+export function withoutVerificationFilters(query: PlaceListQuery): PlaceListQuery {
+  const { english_support: _english, same_day_booking: _sameDay, no_korean_phone: _phone, foreign_card: _card, ...base } = query;
+  return base;
+}
+
 export interface PublicAttribute {
   type: string;
   value: unknown;

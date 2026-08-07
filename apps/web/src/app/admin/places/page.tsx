@@ -22,7 +22,7 @@ export default async function AdminPlacesPage({ searchParams }: Props) {
     </form>
     <div className="panel"><table><thead><tr><th>업체</th><th>지역·업종</th><th>현재 상태</th><th>공개 상태 변경</th><th>API</th></tr></thead><tbody>
       {result.data.map((place) => <tr key={place.id}>
-        <td><strong>{place.name_en ?? place.name_ko}</strong>{place.name_en && <div className="muted">{place.name_ko}</div>}<div className="muted">{place.address_ko}</div></td>
+        <td><Link href={`/admin/places/${place.id}`}><strong>{place.name_en ?? place.name_ko}</strong></Link>{place.name_en && <div className="muted">{place.name_ko}</div>}<div className="muted">{place.address_ko}</div></td>
         <td>{place.area}<br />{place.primary_category}</td>
         <td><span className={`badge ${place.status}`}>{labels[place.status]}</span>{place.published_at && <div className="muted">{new Date(place.published_at).toLocaleDateString("ko-KR")}</div>}</td>
         <td><form action={setPlaceStatus} className="filters" style={{ margin: 0 }}><input type="hidden" name="placeId" value={place.id} /><select className="input" name="status" defaultValue={place.status}>{Object.entries(labels).map(([status, label]) => <option value={status} key={status}>{label}</option>)}</select><button className="button secondary">적용</button></form></td>

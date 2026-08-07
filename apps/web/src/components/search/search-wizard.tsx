@@ -40,6 +40,6 @@ export function SearchWizard() {
       </div>
     </fieldset>
     <button className="search-cta" type="submit">Show verified spots <span aria-hidden="true">→</span></button>
-    <p className="form-note">Availability is not guaranteed in real time. We show the latest verified booking conditions.</p>
+    <p className="form-note">Confirmed matches come first. If none exist, we show same-area alternatives whose conditions are still unconfirmed.</p>
   </form>;
 }

@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { listStaleAttributes } from "@/lib/admin-api";
+
+export default async function StaleDataPage() { const result = await listStaleAttributes(); return <div><h1>오래된 정보</h1><p className="muted">검증일이 없거나 만료된 속성 {result.data.length}건입니다.</p><div className="panel"><table><thead><tr><th>장소</th><th>속성</th><th>상태</th><th>검증일</th><th>만료일</th></tr></thead><tbody>{result.data.map((item) => <tr key={item.id}><td>{item.places ? <Link href={`/admin/places/${item.places.id}`}>{item.places.name_ko}</Link> : "-"}</td><td>{item.attribute_type}</td><td>{item.verification_status}</td><td>{item.verified_at ? new Date(item.verified_at).toLocaleDateString("ko-KR") : "없음"}</td><td>{item.expires_at ? new Date(item.expires_at).toLocaleDateString("ko-KR") : "없음"}</td></tr>)}</tbody></table>{result.data.length === 0 && <p className="muted">현재 만료된 속성이 없습니다.</p>}</div></div>; }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractFromHtml } from "./extract.js";
+import { extractFromHtml, isBookingLink } from "./extract.js";
 
 describe("extractFromHtml", () => {
   it("extracts evidence with its official source", () => {
@@ -13,5 +13,12 @@ describe("extractFromHtml", () => {
     expect(result.evidence.map((item) => item.attributeType)).toEqual(expect.arrayContaining([
       "english_support", "walk_in", "price_confirmed", "booking_channel",
     ]));
+  });
+
+  it("does not promote social or shopping links to booking channels", () => {
+    expect(isBookingLink("https://www.facebook.com/example", "https://example.com")).toBe(false);
+    expect(isBookingLink("https://search.shopping.naver.com/book/catalog/1", "https://example.com")).toBe(false);
+    expect(isBookingLink("https://booking.naver.com/booking/13/bizes/1", "https://example.com")).toBe(true);
+    expect(isBookingLink("https://example.com/reservation", "https://example.com")).toBe(true);
   });
 });

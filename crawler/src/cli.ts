@@ -10,7 +10,7 @@ import { enrichWithKakao } from "./kakao.js";
 import { enrichWithNaver } from "./naver.js";
 import { applyWebsiteOverrides } from "./overrides.js";
 import { fetchPublicData, readPublicDataCsv } from "./public-data.js";
-import { mapConcurrent } from "./runner.js";
+import { mapConcurrent, withRetry } from "./runner.js";
 import { buildBalancedShortlist, writeShortlistCsv } from "./shortlist.js";
 import { uploadCandidates } from "./upload.js";
 
@@ -63,7 +63,7 @@ async function collect(places: Awaited<ReturnType<typeof readPlaces>>) {
   const collectionErrors: Array<{ index: number; message: string }> = [];
   const result = await mapConcurrent(places, config.CRAWLER_CONCURRENCY, async (place, index) => {
     try {
-      const page = await collectOfficialPage(place, config);
+      const page = await withRetry(() => collectOfficialPage(place, config));
       return createCandidate(place, page);
     } catch (error) {
       collectionErrors.push({ index, message: error instanceof Error ? error.message : String(error) });
@@ -113,7 +113,7 @@ async function main(): Promise<void> {
     const places = allPlaces.slice(0, limit);
     let completed = 0;
     const result = await mapConcurrent(places, config.CRAWLER_CONCURRENCY, async (place) => {
-      const enriched = await enrichWithKakao(place, config);
+      const enriched = await withRetry(() => enrichWithKakao(place, config));
       completed += 1;
       if (completed % 100 === 0 || completed === places.length) console.error(`Kakao enrichment: ${completed}/${places.length}`);
       return enriched;
@@ -135,7 +135,7 @@ async function main(): Promise<void> {
     const places = allPlaces.slice(0, limit);
     let completed = 0;
     const result = await mapConcurrent(places, 1, async (place) => {
-      const enriched = await enrichWithNaver(place, config);
+      const enriched = await withRetry(() => enrichWithNaver(place, config));
       completed += 1;
       if (completed % 100 === 0 || completed === places.length) console.error(`Naver enrichment: ${completed}/${places.length}`);
       return enriched;
@@ -179,7 +179,7 @@ async function main(): Promise<void> {
     const websites = args.get("websites");
     if (typeof websites === "string") places = await applyWebsiteOverrides(places, resolveUserPath(websites));
     if (args.has("kakao")) {
-      const enriched = await mapConcurrent(places, config.CRAWLER_CONCURRENCY, (place) => enrichWithKakao(place, config));
+      const enriched = await mapConcurrent(places, config.CRAWLER_CONCURRENCY, (place) => withRetry(() => enrichWithKakao(place, config)));
       places = enriched.values;
     }
     const result = await collect(places);

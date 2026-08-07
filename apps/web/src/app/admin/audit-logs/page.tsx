@@ -1,0 +1,3 @@
+import { listAuditLogs } from "@/lib/admin-api";
+
+export default async function AuditLogsPage() { const result = await listAuditLogs(); return <div><h1>관리자 작업 이력</h1><p className="muted">최근 변경 50건</p><div className="panel"><table><thead><tr><th>시각</th><th>작업</th><th>대상</th><th>변경 내용</th></tr></thead><tbody>{result.data.map((item) => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString("ko-KR")}</td><td>{item.action}</td><td>{item.entity_type}<div className="muted">{item.entity_id}</div></td><td><details><summary>보기</summary><pre>{JSON.stringify({ before: item.before_data, after: item.after_data }, null, 2)}</pre></details></td></tr>)}</tbody></table></div></div>; }

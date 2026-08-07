@@ -1,5 +1,14 @@
 export interface SettledRun<T> { values: T[]; errors: Array<{ index: number; message: string }> }
 
+export async function withRetry<T>(task: () => Promise<T>, options: { attempts?: number; baseDelayMs?: number; sleep?: (ms: number) => Promise<void> } = {}): Promise<T> {
+  const attempts = options.attempts ?? 3; const baseDelayMs = options.baseDelayMs ?? 500; const sleep = options.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try { return await task(); } catch (error) { lastError = error; if (attempt < attempts) await sleep(baseDelayMs * (2 ** (attempt - 1))); }
+  }
+  throw lastError;
+}
+
 export async function mapConcurrent<T, R>(
   values: readonly T[],
   concurrency: number,

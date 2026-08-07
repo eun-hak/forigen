@@ -5,6 +5,7 @@ import { SearchWizard } from "@/components/search/search-wizard";
 export const metadata: Metadata = {
   title: "K-Beauty Now — Find a beauty spot you can actually book",
   description: "Find verified K-beauty salons in Seoul with English support, foreign card information and booking conditions.",
+  alternates: { canonical: "/en", languages: { en: "/en", ko: "/ko", "x-default": "/en" } },
 };
 
 export default function EnglishHomePage() {
