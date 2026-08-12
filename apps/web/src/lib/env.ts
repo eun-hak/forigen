@@ -1,12 +1,20 @@
 import "server-only";
-import { z } from "zod";
 
-const serverEnvSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.url(),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  SUPABASE_SECRET_KEY: z.string().min(1),
-  ADMIN_ALLOWED_EMAIL: z.email(),
-  KAKAO_REST_API_KEY: z.string().min(1),
-});
+export const env = {
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
+  SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY ?? "",
+  ADMIN_ALLOWED_EMAIL: process.env.ADMIN_ALLOWED_EMAIL ?? "",
+  KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY ?? "",
+};
 
-export const env = serverEnvSchema.parse(process.env);
+export const isAdminConfigured = Boolean(
+  env.NEXT_PUBLIC_SUPABASE_URL &&
+  env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+  env.SUPABASE_SECRET_KEY &&
+  env.ADMIN_ALLOWED_EMAIL,
+);
+
+export const isPublicDataConfigured = Boolean(
+  env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SECRET_KEY,
+);

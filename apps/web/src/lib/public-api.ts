@@ -1,5 +1,5 @@
 import "server-only";
-import { env } from "@/lib/env";
+import { env, isPublicDataConfigured } from "@/lib/env";
 import { attributeMap, PublicAttribute, PublicService, recommendedScore, unwrapAttributeValue, type PlaceListQuery } from "@/lib/place";
 
 interface RawAttribute {
@@ -74,6 +74,9 @@ const select = [
 ].join(",");
 
 async function supabaseRequest<T>(path: string): Promise<T> {
+  // Local UI previews should render their empty states when Supabase has not
+  // been configured yet, instead of failing every data-backed route.
+  if (!isPublicDataConfigured) return [] as T;
   const response = await fetch(`${env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/${path}`, {
     headers: { apikey: env.SUPABASE_SECRET_KEY, Authorization: `Bearer ${env.SUPABASE_SECRET_KEY}` },
     cache: "no-store",

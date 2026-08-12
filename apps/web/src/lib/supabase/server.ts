@@ -1,7 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { env } from "@/lib/env";
+import { env, isAdminConfigured } from "@/lib/env";
 
 export async function createAuthClient() {
   const store = await cookies();
@@ -17,6 +17,7 @@ export async function createAuthClient() {
 }
 
 export async function requireAdmin() {
+  if (!isAdminConfigured) return null;
   const client = await createAuthClient();
   const { data: { user } } = await client.auth.getUser();
   if (!user || user.email?.toLowerCase() !== env.ADMIN_ALLOWED_EMAIL.toLowerCase()) return null;

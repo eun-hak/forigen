@@ -1,5 +1,5 @@
 import "server-only";
-import { env } from "@/lib/env";
+import { env, isAdminConfigured } from "@/lib/env";
 import { placeStatusUpdate, type PlaceStatus } from "@/lib/admin-place";
 
 export interface CandidateRow {
@@ -38,6 +38,10 @@ export interface AdminPlaceDetail extends AdminPlaceRow { phone: string | null; 
 const headers = { apikey: env.SUPABASE_SECRET_KEY, "Content-Type": "application/json" };
 
 async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; count?: number }> {
+  if (!isAdminConfigured) {
+    if (!init?.method || init.method === "GET") return { data: [] as T, count: 0 };
+    throw new Error("Admin data service is not configured");
+  }
   const response = await fetch(`${env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/${path}`, {
     ...init,
     headers: { ...headers, ...init?.headers },
