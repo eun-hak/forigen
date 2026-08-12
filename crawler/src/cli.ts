@@ -12,7 +12,7 @@ import { applyWebsiteOverrides } from "./overrides.js";
 import { fetchPublicData, readPublicDataCsv } from "./public-data.js";
 import { mapConcurrent, withRetry } from "./runner.js";
 import { buildBalancedShortlist, writeShortlistCsv } from "./shortlist.js";
-import { uploadCandidates } from "./upload.js";
+import { syncApprovedEnrichment, uploadCandidates } from "./upload.js";
 
 function usage(): never {
   console.error(`Usage:
@@ -26,7 +26,8 @@ function usage(): never {
   pnpm crawl shortlist --input PLACES.json [--limit 300] [--output FILE]
   pnpm crawl collect --input PLACES.json [--output FILE]
   pnpm crawl upload --input CANDIDATES.json
-  pnpm crawl pipeline --input LOCALDATA.csv [--websites websites.csv] [--kakao] [--output FILE]`);
+  pnpm crawl sync-enrichment --input CANDIDATES.json
+  pnpm crawl pipeline --input LOCALDATA.csv [--websites websites.csv] [--kakao] [--naver] [--output FILE]`);
   process.exit(1);
 }
 
@@ -174,6 +175,11 @@ async function main(): Promise<void> {
     console.log(JSON.stringify({ uploaded: count }));
     return;
   }
+  if (command === "sync-enrichment") {
+    const result = await syncApprovedEnrichment(await readCandidates(required(args, "input")), config);
+    console.log(JSON.stringify(result));
+    return;
+  }
   if (command === "pipeline") {
     let places = dedupePlaces(await readPublicDataCsv(required(args, "input")));
     const websites = args.get("websites");
@@ -181,6 +187,10 @@ async function main(): Promise<void> {
     if (args.has("kakao")) {
       const enriched = await mapConcurrent(places, config.CRAWLER_CONCURRENCY, (place) => withRetry(() => enrichWithKakao(place, config)));
       places = enriched.values;
+    }
+    if (args.has("naver")) {
+      const enriched = await mapConcurrent(places, 1, (place) => withRetry(() => enrichWithNaver(place, config)));
+      places = promoteIndependentWebsites(enriched.values);
     }
     const result = await collect(places);
     const output = outputPath(args, "candidates.json");

@@ -30,16 +30,7 @@ export function SearchWizard() {
       <legend><span>03</span> Where in Seoul?</legend>
       <div className="choice-grid">{areas.map(([value, title, hint], index) => <label className="choice" key={value}><input type="radio" name="area" value={value} defaultChecked={index === 0} /><strong>{title}</strong><small>{hint}</small></label>)}</div>
     </fieldset>
-    <fieldset className="wizard-step">
-      <legend><span>04</span> What matters to you?</legend>
-      <div className="condition-grid">
-        <label className="condition"><input type="checkbox" name="english_support" value="confirmed" /><span><strong>English support</strong><small>Confirmed communication support</small></span></label>
-        <label className="condition"><input type="checkbox" name="no_korean_phone" value="true" /><span><strong>No Korean phone</strong><small>Book without a local number</small></span></label>
-        <label className="condition"><input type="checkbox" name="foreign_card" value="confirmed" /><span><strong>Foreign cards</strong><small>International card confirmed</small></span></label>
-        <label className="condition"><input type="checkbox" name="same_day_booking" value="true" /><span><strong>Same-day booking</strong><small>Generally accepts same-day requests</small></span></label>
-      </div>
-    </fieldset>
-    <button className="search-cta" type="submit">Show verified spots <span aria-hidden="true">→</span></button>
-    <p className="form-note">Confirmed matches come first. If none exist, we show same-area alternatives whose conditions are still unconfirmed.</p>
+    <button className="search-cta" type="submit">Show matching spots <span aria-hidden="true">→</span></button>
+    <p className="form-note">We’ll show published places matching your selected service and area.</p>
   </form>;
 }

@@ -11,6 +11,36 @@ export const sourceSchema = z.object({
   checkedAt: z.iso.datetime(),
 });
 
+export const socialAccountSchema = z.object({
+  platform: z.enum(["instagram", "youtube", "tiktok"]),
+  profileUrl: z.url(),
+  handle: z.string().min(1).optional(),
+  confidence: z.number().min(0).max(1),
+  discoveryMethod: z.enum(["official_website_link"]),
+  status: z.literal("candidate"),
+  checkedAt: z.iso.datetime(),
+});
+
+export const bookingChannelSchema = z.object({
+  channelType: z.enum(["website", "instagram_dm", "whatsapp", "line", "kakao", "naver_booking", "email", "phone"]),
+  url: z.url().optional(),
+  value: z.string().min(1).optional(),
+  confidence: z.number().min(0).max(1),
+  status: z.literal("candidate"),
+  checkedAt: z.iso.datetime(),
+}).refine((item) => item.url || item.value, "A channel URL or value is required");
+
+export const menuItemSchema = z.object({
+  name: z.string().min(1).max(160),
+  price: z.number().int().nonnegative(),
+  currency: z.literal("KRW"),
+  evidenceText: z.string().min(1),
+  sourceUrl: z.url(),
+  confidence: z.number().min(0).max(1),
+  status: z.literal("candidate"),
+  checkedAt: z.iso.datetime(),
+});
+
 export const placeSeedSchema = z.object({
   externalKey: z.string().min(1),
   nameKo: z.string().min(1),
@@ -44,6 +74,10 @@ export const placeSeedSchema = z.object({
   }).optional(),
   officialWebsite: z.url().optional(),
   bookingUrl: z.url().optional(),
+  socialAccounts: z.array(socialAccountSchema).optional(),
+  bookingChannels: z.array(bookingChannelSchema).optional(),
+  openingHoursText: z.string().max(500).optional(),
+  menuItems: z.array(menuItemSchema).optional(),
   sources: z.array(sourceSchema).min(1),
 });
 export type PlaceSeed = z.infer<typeof placeSeedSchema>;

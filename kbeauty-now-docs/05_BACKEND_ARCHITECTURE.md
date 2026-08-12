@@ -2,10 +2,10 @@
 
 ## 1. 기술 스택
 
-- Express
+- Next.js Route Handlers and Server Actions
 - TypeScript
 - Zod
-- Drizzle ORM
+- Supabase REST API and PostgreSQL functions
 - Supabase PostgreSQL
 - Supabase Storage
 - 관리자 인증: Supabase Auth 또는 단일 관리자 계정
@@ -13,9 +13,9 @@
 
 ## 2. 원칙
 
-- Express는 짧은 API 요청만 처리
+- Next.js 서버 코드는 짧은 API 요청과 form action만 처리
 - 크롤링·Playwright는 로컬에서 실행
-- 비즈니스 로직은 Router에서 분리
+- 비즈니스 로직은 Route Handler와 Server Action에서 분리
 - 모든 입력은 Zod 검증
 - 공개 데이터와 관리자 데이터 분리
 - Service Role 키는 서버에서만 사용
@@ -23,37 +23,23 @@
 ## 3. 권장 구조
 
 ```text
-apps/api/
-├─ src/
-│  ├─ app.ts
-│  ├─ routes/
-│  │  ├─ places.routes.ts
-│  │  ├─ search.routes.ts
-│  │  ├─ guides.routes.ts
-│  │  ├─ reports.routes.ts
-│  │  └─ admin.routes.ts
-│  ├─ controllers/
-│  ├─ services/
-│  │  ├─ place.service.ts
-│  │  ├─ search.service.ts
-│  │  ├─ verification.service.ts
-│  │  └─ candidate.service.ts
-│  ├─ repositories/
-│  ├─ schemas/
-│  ├─ middleware/
-│  ├─ db/
-│  └─ utils/
-└─ vercel.json
+apps/web/src/
+├─ app/api/v1/        # 공개 JSON API
+├─ app/admin/        # 관리자 화면·Server Actions
+├─ app/[locale]/     # 공개 form actions
+└─ lib/              # 검증·비즈니스·Supabase 접근
+
+supabase/migrations/          # 스키마, RLS, transaction RPC
+crawler/src/                 # 로컬 수집 파이프라인
 ```
 
 ## 4. 요청 처리 구조
 
 ```text
-Route
-→ Controller
-→ Service
-→ Repository
-→ Supabase PostgreSQL
+Route Handler / Server Action
+→ Zod validation
+→ lib data function
+→ Supabase REST / PostgreSQL function
 ```
 
 ## 5. 도메인

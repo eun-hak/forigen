@@ -1,3 +1,4 @@
+import "server-only";
 import { env } from "@/lib/env";
 import { attributeMap, PublicAttribute, PublicService, recommendedScore, unwrapAttributeValue, type PlaceListQuery } from "@/lib/place";
 
@@ -56,6 +57,13 @@ export interface PublicPlace {
   bookingChannels: { website: string | null; bookingUrl: string | null; phone: string | null };
   lastVerifiedAt: string | null;
   publishedAt: string | null;
+}
+
+export interface PublicEnrichment {
+  socialAccounts: Array<{ platform: string; handle: string | null; url: string; checkedAt: string }>;
+  additionalBookingChannels: Array<{ type: string; url: string | null; value: string | null; checkedAt: string }>;
+  menuItems: Array<{ id: string; name: string; price: number; currency: string; checkedAt: string }>;
+  openingHours: { text: string; checkedAt: string } | null;
 }
 
 const select = [
@@ -147,6 +155,14 @@ export async function listPublicPlaces(query: PlaceListQuery) {
   return { items: filtered.slice(offset, offset + query.limit), page: query.page, limit: query.limit, total: filtered.length };
 }
 
+export async function listMapPlaces(category: PlaceListQuery["category"] = "hair") {
+  return (await fetchPublishedPlaces({ category })).filter((place) => place.coordinates !== null).map((place) => ({
+    id: place.id, slug: place.slug, name: place.name, nameKo: place.nameKo, nameEn: place.nameEn,
+    area: place.area, address: place.address, coordinates: place.coordinates!, phone: place.bookingChannels.phone,
+    minPrice: place.services[0]?.minPrice ?? null, maxPrice: place.services[0]?.maxPrice ?? null,
+  }));
+}
+
 export async function getPublicPlace(slug: string) {
   const params = new URLSearchParams({ select, status: "eq.published", slug: `eq.${slug}`, limit: "1" });
   const row = (await supabaseRequest<RawPlace[]>(`places?${params}`))[0];
@@ -155,12 +171,23 @@ export async function getPublicPlace(slug: string) {
   const sourceParams = new URLSearchParams({
     select: "id,source_type,source_url,title,checked_at", place_id: `eq.${row.id}`, order: "checked_at.desc",
   });
-  const sources = await supabaseRequest<Array<{ id: string; source_type: string; source_url: string | null; title: string | null; checked_at: string }>>(`sources?${sourceParams}`);
+  const enrichmentFilter = `place_id=eq.${row.id}&verification_status=eq.verified`;
+  const [sources, socialRows, channelRows, menuRows, hourRows] = await Promise.all([
+    supabaseRequest<Array<{ id: string; source_type: string; source_url: string | null; title: string | null; checked_at: string }>>(`sources?${sourceParams}`),
+    supabaseRequest<Array<{ platform: string; handle: string | null; profile_url: string; checked_at: string }>>(`place_social_accounts?${enrichmentFilter}&select=platform,handle,profile_url,checked_at`),
+    supabaseRequest<Array<{ channel_type: string; channel_url: string | null; channel_value: string | null; checked_at: string }>>(`place_booking_channels?${enrichmentFilter}&select=channel_type,channel_url,channel_value,checked_at&order=is_primary.desc,confidence.desc`),
+    supabaseRequest<Array<{ id: string; name: string; price: number; currency: string; checked_at: string }>>(`place_menu_items?${enrichmentFilter}&select=id,name,price,currency,checked_at&order=price.asc&limit=50`),
+    supabaseRequest<Array<{ hours_text: string; checked_at: string }>>(`place_opening_hours?${enrichmentFilter}&select=hours_text,checked_at&limit=1`),
+  ]);
   const related = (await fetchPublishedPlaces({ area: place.area as PlaceListQuery["area"], category: place.category as PlaceListQuery["category"] }))
     .filter((item) => item.id !== place.id).slice(0, 4).map(({ id, slug: relatedSlug, name, category, area }) => ({ id, slug: relatedSlug, name, category, area }));
   return {
     ...place,
     sources: sources.map((source) => ({ id: source.id, type: source.source_type, url: source.source_url, title: source.title, checkedAt: source.checked_at })),
+    socialAccounts: socialRows.map((item) => ({ platform: item.platform, handle: item.handle, url: item.profile_url, checkedAt: item.checked_at })),
+    additionalBookingChannels: channelRows.map((item) => ({ type: item.channel_type, url: item.channel_url, value: item.channel_value, checkedAt: item.checked_at })),
+    menuItems: menuRows.map((item) => ({ id: item.id, name: item.name, price: Number(item.price), currency: item.currency, checkedAt: item.checked_at })),
+    openingHours: hourRows[0] ? { text: hourRows[0].hours_text, checkedAt: hourRows[0].checked_at } : null,
     relatedPlaces: related,
   };
 }

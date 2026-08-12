@@ -5,7 +5,14 @@ export function createCandidate(place: PlaceSeed, page?: PageExtraction): CrawlC
   const confidence = Math.min(0.98, 0.45 + (place.roadAddressKo ? 0.15 : 0) +
     (place.phone ? 0.1 : 0) + (place.latitude ? 0.1 : 0) + (page ? 0.08 : 0) +
     (page?.evidence.length ? 0.1 : 0));
-  const enrichedPlace: PlaceSeed = page?.bookingUrl ? { ...place, bookingUrl: page.bookingUrl } : place;
+  const enrichedPlace: PlaceSeed = page ? {
+    ...place,
+    ...(page.bookingUrl ? { bookingUrl: page.bookingUrl } : {}),
+    ...(page.socialAccounts.length ? { socialAccounts: page.socialAccounts } : {}),
+    ...(page.bookingChannels.length ? { bookingChannels: page.bookingChannels } : {}),
+    ...(page.openingHoursText ? { openingHoursText: page.openingHoursText } : {}),
+    ...(page.menuItems.length ? { menuItems: page.menuItems } : {}),
+  } : place;
   return crawlCandidateSchema.parse({
     externalKey: place.externalKey,
     placeName: place.nameKo,

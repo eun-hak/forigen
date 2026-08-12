@@ -1,3 +1,4 @@
+import "server-only";
 import { env } from "@/lib/env";
 import { placeStatusUpdate, type PlaceStatus } from "@/lib/admin-place";
 

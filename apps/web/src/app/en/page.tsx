@@ -16,7 +16,7 @@ export default function EnglishHomePage() {
       <p>Clear answers on English support, Korean phone requirements, foreign cards and same-day booking.</p>
       <div className="trust-row"><span>✓ Easy to compare</span><span>✓ Foreigner-first</span><span>✓ Honest about unknowns</span></div>
     </section>
-    <section className="search-section"><div className="section-heading"><div><span className="eyebrow">START HERE</span><h2>Build your beauty plan</h2></div><p>Four quick choices. No account needed.</p></div><SearchWizard /></section>
+    <section className="search-section"><div className="section-heading"><div><span className="eyebrow">START HERE</span><h2>Build your beauty plan</h2></div><p>Three quick choices. No account needed.</p></div><SearchWizard /></section>
     <section className="promise-grid">
       <article><span>01</span><h3>Not just “foreigner friendly”</h3><p>Each booking condition is checked and shown separately, so you know what is confirmed.</p></article>
       <article><span>02</span><h3>Designed for real decisions</h3><p>Compare booking routes, price ranges and communication options before you travel.</p></article>

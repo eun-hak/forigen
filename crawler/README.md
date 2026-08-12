@@ -18,8 +18,9 @@ Replace the contact address in `CRAWLER_USER_AGENT` before crawling public websi
 2. Import active businesses in Hongdae, Myeongdong, Gangnam, and Seongsu.
 3. Optionally enrich coordinates and phone data using Kakao Local API.
 4. Add official website URLs using the override CSV.
-5. Collect official pages and create evidence-bearing candidates.
-6. Review candidates before uploading or approving them.
+5. Discover independent official websites through Naver Local Search when configured.
+6. Collect official-page social accounts, booking channels, opening-hours text, and menu-price candidates.
+7. Review candidates before uploading or approving them. Instagram media is never copied.
 
 LOCALDATA CSV files are commonly encoded as CP949. The importer detects UTF-8 versus CP949 automatically; do not resave the source file manually.
 
@@ -31,6 +32,7 @@ pnpm crawl apply-websites \
   --websites crawler/input/websites.csv
 pnpm crawl collect --input crawler/output/places-with-websites.json
 pnpm crawl upload --input crawler/output/candidates.json
+pnpm crawl sync-enrichment --input crawler/output/candidates.json
 ```
 
 Or run the local stages together:
@@ -39,8 +41,11 @@ Or run the local stages together:
 pnpm crawl pipeline \
   --input crawler/input/beauty_salons.csv \
   --websites crawler/input/websites.csv \
-  --kakao
+  --kakao \
+  --naver
 ```
+
+`--naver` is optional and requires Naver API credentials. It promotes only independent external links; Naver Blog, social profiles, and messaging links are not treated as official websites. All enrichment remains pending until an administrator reviews and approves the candidate.
 
 ## Required external configuration
 

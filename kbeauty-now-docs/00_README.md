@@ -62,6 +62,7 @@ Vercel
 | `12_CURSOR_MASTER_PROMPT.md` | Cursor에 전달할 전체 지시문 |
 | `13_ENV_DEPLOYMENT.md` | 환경변수·Vercel·Supabase 배포 |
 | `14_ACCEPTANCE_CRITERIA.md` | 기능별 검수 기준 |
+| `17_CURRENT_STATUS.md` | 현재 기능, DB, 수집, 검증 및 남은 과제 |
 
 ## 가장 중요한 원칙
 
