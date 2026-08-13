@@ -1,21 +1,254 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { hasVerificationFilters, placeListQuerySchema, withoutVerificationFilters } from "@/lib/place";
+import {
+  hasVerificationFilters,
+  placeListQuerySchema,
+  withoutVerificationFilters,
+} from "@/lib/place";
 import { listPublicPlaces, type PublicPlace } from "@/lib/public-api";
 
-export const metadata: Metadata = { title: "검증된 서울 뷰티 장소 검색 | K-Beauty Now", robots: { index: false, follow: true }, alternates: { canonical: "/ko/search", languages: { en: "/en/search", ko: "/ko/search" } } };
-interface Props { searchParams: Promise<Record<string, string | string[] | undefined>> }
-const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
-const labels: Record<string, string> = { hongdae: "홍대", myeongdong: "명동", gangnam: "강남", seongsu: "성수", hair: "헤어", nails: "네일", head_spa: "헤드스파", personal_color: "퍼스널컬러" };
-const money = (value: number | null) => value === null ? null : `${value.toLocaleString("ko-KR")}원`;
-const truth = (value: unknown) => value === true || ["confirmed", "business_confirmed", "official_source", "visitor_confirmed"].includes(String(value));
+export const metadata: Metadata = {
+  title: "검증된 서울 뷰티 장소 검색 | K-Beauty Now",
+  robots: { index: false, follow: true },
+  alternates: {
+    canonical: "/ko/search",
+    languages: { en: "/en/search", ko: "/ko/search" },
+  },
+};
+interface Props {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+const first = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+const labels: Record<string, string> = {
+  hongdae: "홍대",
+  myeongdong: "명동",
+  gangnam: "강남",
+  seongsu: "성수",
+  hair: "헤어",
+  nails: "네일",
+  head_spa: "헤드스파",
+  personal_color: "퍼스널컬러",
+};
+const money = (value: number | null) =>
+  value === null ? null : `${value.toLocaleString("ko-KR")}원`;
+const truth = (value: unknown) =>
+  value === true ||
+  [
+    "confirmed",
+    "business_confirmed",
+    "official_source",
+    "visitor_confirmed",
+  ].includes(String(value));
 
 function PlaceCardKo({ place }: { place: PublicPlace }) {
   const service = place.services[0];
-  return <article className="place-card"><div className="place-card-top"><div><span className="place-kicker">{labels[place.area]} · {labels[place.category]}</span><h2>{place.nameKo}</h2>{place.nameEn && <p className="muted">{place.nameEn}</p>}</div><span className="verified-dot">정보 등록</span></div><p className="place-address">{place.address ?? "주소 확인 중"}</p><div className="fact-row"><span><small>가격</small><strong>{service ? [money(service.minPrice), money(service.maxPrice)].filter(Boolean).join(" – ") || "문의 필요" : "문의 필요"}</strong></span><span><small>소요 시간</small><strong>{service?.durationMin ? `${service.durationMin}${service.durationMax ? `–${service.durationMax}` : ""}분` : "확인되지 않음"}</strong></span><span><small>최근 확인</small><strong>{place.lastVerifiedAt ? new Date(place.lastVerifiedAt).toLocaleDateString("ko-KR") : "기록 없음"}</strong></span></div><div className="tag-row"><span className={truth(place.attributes.english_support) ? "positive" : ""}>영어 {truth(place.attributes.english_support) ? "확인" : "미확인"}</span><span className={place.attributes.korean_phone_required === false ? "positive" : ""}>{place.attributes.korean_phone_required === false ? "한국 번호 불필요 확인" : "한국 번호 미확인"}</span><span className={truth(place.attributes.foreign_card) ? "positive" : ""}>해외 카드 {truth(place.attributes.foreign_card) ? "확인" : "미확인"}</span></div><div className="card-actions"><Link className="button secondary" href={`/ko/places/${place.slug}`}>상세 보기</Link></div></article>;
+  return (
+    <Link
+      className="place-card-link"
+      href={`/ko/places/${place.slug}`}
+      aria-label={`${place.nameKo} 상세 보기`}
+    >
+      <article className={`place-card${place.heroImage ? " has-image" : ""}`}>
+        {place.heroImage && (
+          <div className={`place-card-media media-${place.area}`}>
+            <img src={place.heroImage.url} alt={place.heroImage.altKo} loading="lazy" referrerPolicy="no-referrer" />
+            <span>{place.heroImage.kind === "kakao_roadview" ? "외관 로드뷰" : place.heroImage.kind === "kakao_visitor" ? "방문 사진" : place.heroImage.kind === "naver_store" || place.heroImage.kind === "kakao_store" ? "매장 사진" : "공식 이미지"}</span>
+          </div>
+        )}
+        <div className="place-card-body">
+        <div className="place-card-top">
+          <div>
+            <span className="place-kicker">
+              {labels[place.area]} · {labels[place.category]}
+            </span>
+            <h2>{place.nameKo}</h2>
+            {place.nameEn && <p className="muted">{place.nameEn}</p>}
+          </div>
+          <span className="verified-dot">정보 등록</span>
+        </div>
+        <p className="place-address">{place.address ?? "주소 확인 중"}</p>
+        <div className="fact-row">
+          <span>
+            <small>가격</small>
+            <strong>
+              {service
+                ? [money(service.minPrice), money(service.maxPrice)]
+                    .filter(Boolean)
+                    .join(" – ") || "문의 필요"
+                : "문의 필요"}
+            </strong>
+          </span>
+          <span>
+            <small>소요 시간</small>
+            <strong>
+              {service?.durationMin
+                ? `${service.durationMin}${service.durationMax ? `–${service.durationMax}` : ""}분`
+                : "확인되지 않음"}
+            </strong>
+          </span>
+          <span>
+            <small>최근 확인</small>
+            <strong>
+              {place.lastVerifiedAt
+                ? new Date(place.lastVerifiedAt).toLocaleDateString("ko-KR")
+                : "기록 없음"}
+            </strong>
+          </span>
+        </div>
+        <div className="tag-row">
+          <span
+            className={
+              truth(place.attributes.english_support) ? "positive" : ""
+            }
+          >
+            영어 {truth(place.attributes.english_support) ? "확인" : "미확인"}
+          </span>
+          <span
+            className={
+              place.attributes.korean_phone_required === false ? "positive" : ""
+            }
+          >
+            {place.attributes.korean_phone_required === false
+              ? "한국 번호 불필요 확인"
+              : "한국 번호 미확인"}
+          </span>
+          <span
+            className={truth(place.attributes.foreign_card) ? "positive" : ""}
+          >
+            해외 카드 {truth(place.attributes.foreign_card) ? "확인" : "미확인"}
+          </span>
+        </div>
+        <div className="card-actions">
+          <span className="button secondary">상세 보기</span>
+        </div>
+        </div>
+      </article>
+    </Link>
+  );
 }
 
 export default async function KoreanSearchPage({ searchParams }: Props) {
-  const raw = await searchParams; const parsed = placeListQuerySchema.safeParse(Object.fromEntries(Object.entries(raw).map(([key, value]) => [key, first(value)]).filter(([, value]) => value !== undefined))); const query = parsed.success ? parsed.data : placeListQuerySchema.parse({}); const exactResult = await listPublicPlaces(query); const fallback = exactResult.total === 0 && hasVerificationFilters(query); const result = fallback ? await listPublicPlaces(withoutVerificationFilters(query)) : exactResult; const title = [query.category && labels[query.category], query.area && `· ${labels[query.area]}`].filter(Boolean).join(" ") || "검증된 장소 전체";
-  return <main className="search-page"><div className="search-title"><div><span className="eyebrow">공개 장소 검색</span><h1>{title}</h1><p>{fallback ? `선택 조건이 확인된 장소는 아직 없으며, 확인 전인 대안 ${result.total}곳을 보여드립니다.` : `선택한 예약 조건에 맞는 장소 ${result.total}곳입니다.`}</p></div><Link className="button secondary" href="/ko">검색 조건 변경</Link></div>{!parsed.success && <div className="notice">일부 검색 조건이 올바르지 않아 전체 공개 장소를 표시합니다.</div>}{fallback && <div className="notice fallback-notice"><strong>조건 확인 데이터가 아직 부족합니다.</strong><span>아래 장소는 지역과 업종은 일치하지만 선택한 조건은 확인 전입니다. 상세 페이지에서 예약 채널로 직접 확인해 주세요.</span></div>}<div className="results-layout"><aside className="filter-summary"><h2>선택한 조건</h2><dl><div><dt>업종</dt><dd>{query.category ? labels[query.category] : "전체"}</dd></div><div><dt>지역</dt><dd>{query.area ? labels[query.area] : "전체"}</dd></div><div><dt>정렬</dt><dd>{query.sort === "recommended" ? "추천순" : query.sort === "recent" ? "최근 확인순" : "이름순"}</dd></div></dl><Link href="/ko" className="text-link">처음부터 다시 선택</Link></aside><section className="result-list">{result.items.map((place) => <PlaceCardKo place={place} key={place.id} />)}{result.items.length === 0 && <div className="empty-state"><span>◇</span><h2>조건에 맞는 공개 장소가 없습니다</h2><p>지역이나 업종을 바꾸거나 새로운 장소가 등록될 때 다시 확인해 주세요.</p><Link className="button" href="/ko">검색 조건 수정</Link></div>}{result.total > query.limit && <nav className="pagination">{query.page > 1 && <Link className="button secondary" href={{ query: { ...query, page: query.page - 1 } }}>이전</Link>}<span>{query.page} / {Math.ceil(result.total / query.limit)} 페이지</span>{query.page * query.limit < result.total && <Link className="button secondary" href={{ query: { ...query, page: query.page + 1 } }}>다음</Link>}</nav>}</section></div></main>;
+  const raw = await searchParams;
+  const parsed = placeListQuerySchema.safeParse(
+    Object.fromEntries(
+      Object.entries(raw)
+        .map(([key, value]) => [key, first(value)])
+        .filter(([, value]) => value !== undefined),
+    ),
+  );
+  const query = parsed.success ? parsed.data : placeListQuerySchema.parse({});
+  const exactResult = await listPublicPlaces(query);
+  const fallback = exactResult.total === 0 && hasVerificationFilters(query);
+  const result = fallback
+    ? await listPublicPlaces(withoutVerificationFilters(query))
+    : exactResult;
+  const title =
+    [
+      query.category && labels[query.category],
+      query.area && `· ${labels[query.area]}`,
+    ]
+      .filter(Boolean)
+      .join(" ") || "검증된 장소 전체";
+  return (
+    <main className="search-page">
+      <div className="search-title">
+        <div>
+          <span className="eyebrow">공개 장소 검색</span>
+          <h1>{title}</h1>
+          <p>
+            {fallback
+              ? `선택 조건이 확인된 장소는 아직 없으며, 확인 전인 대안 ${result.total}곳을 보여드립니다.`
+              : `선택한 예약 조건에 맞는 장소 ${result.total}곳입니다.`}
+          </p>
+        </div>
+        <Link className="button secondary" href="/ko">
+          검색 조건 변경
+        </Link>
+      </div>
+      {!parsed.success && (
+        <div className="notice">
+          일부 검색 조건이 올바르지 않아 전체 공개 장소를 표시합니다.
+        </div>
+      )}
+      {fallback && (
+        <div className="notice fallback-notice">
+          <strong>조건 확인 데이터가 아직 부족합니다.</strong>
+          <span>
+            아래 장소는 지역과 업종은 일치하지만 선택한 조건은 확인 전입니다.
+            상세 페이지에서 예약 채널로 직접 확인해 주세요.
+          </span>
+        </div>
+      )}
+      <div className="results-layout">
+        <aside className="filter-summary">
+          <h2>선택한 조건</h2>
+          <dl>
+            <div>
+              <dt>업종</dt>
+              <dd>{query.category ? labels[query.category] : "전체"}</dd>
+            </div>
+            <div>
+              <dt>지역</dt>
+              <dd>{query.area ? labels[query.area] : "전체"}</dd>
+            </div>
+            <div>
+              <dt>정렬</dt>
+              <dd>
+                {query.sort === "recommended"
+                  ? "추천순"
+                  : query.sort === "recent"
+                    ? "최근 확인순"
+                    : "이름순"}
+              </dd>
+            </div>
+          </dl>
+          <Link href="/ko" className="text-link">
+            처음부터 다시 선택
+          </Link>
+        </aside>
+        <section className="result-list">
+          {result.items.map((place) => (
+            <PlaceCardKo place={place} key={place.id} />
+          ))}
+          {result.items.length === 0 && (
+            <div className="empty-state">
+              <span>◇</span>
+              <h2>조건에 맞는 공개 장소가 없습니다</h2>
+              <p>
+                지역이나 업종을 바꾸거나 새로운 장소가 등록될 때 다시 확인해
+                주세요.
+              </p>
+              <Link className="button" href="/ko">
+                검색 조건 수정
+              </Link>
+            </div>
+          )}
+          {result.total > query.limit && (
+            <nav className="pagination">
+              {query.page > 1 && (
+                <Link
+                  className="button secondary"
+                  href={{ query: { ...query, page: query.page - 1 } }}
+                >
+                  이전
+                </Link>
+              )}
+              <span>
+                {query.page} / {Math.ceil(result.total / query.limit)} 페이지
+              </span>
+              {query.page * query.limit < result.total && (
+                <Link
+                  className="button secondary"
+                  href={{ query: { ...query, page: query.page + 1 } }}
+                >
+                  다음
+                </Link>
+              )}
+            </nav>
+          )}
+        </section>
+      </div>
+    </main>
+  );
 }
